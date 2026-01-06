@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Function for formatting sol
+format_sol() {
+    # Conversion of lamports into solans and rounding to the first digit after the decimal point
+    rounded=$(printf "%.1f" "$(echo "$1 / 1000000000" | bc -l)")
+    
+    # Formatting with commas for digits
+    formatted=$(printf "%'f" "$rounded")
+    printf "${formatted:0:-5}"
+}
+
 # Getting information about the current epoch
 epoch_info=$(curl -s -X POST -H "Content-Type: application/json" -d '{
    "jsonrpc": "2.0",
@@ -51,10 +61,10 @@ echo "$response_epoch_metrics" | jq .
 bam_metrics=$(echo "$response_epoch_metrics" | jq '.bam_epoch_metrics')
 
 # Data processing and conversion of lamports into solans and rounding to the first digit after the decimal point
-available_bam_delegation_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.available_bam_delegation_stake / 1000000000') )
-bam_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.bam_stake / 1000000000') )
-jitosol_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.jitosol_stake / 1000000000') )
-total_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.total_stake / 1000000000') )
+available_bam_delegation_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.available_bam_delegation_stake') )
+bam_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.bam_stake') )
+jitosol_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.jitosol_stake') )
+total_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.total_stake') )
 
 # Pull validators
 bam_validators=$(echo "$response_bam_validators" | jq '.bam_validators')
@@ -77,10 +87,10 @@ echo "------------------------------"
 echo "Total BAM Validators    : $total_validators"
 echo "Eligible BAM Validators : $eligible_validators"
 echo "------------------------------"
-echo "Available BAM Delegation Stake : $available_bam_delegation_stake" 
-echo "BAM Stake                      : $bam_stake" 
-echo "JitoSOL Stake                  : $jitosol_stake" 
-echo "Total Stake                    : $total_stake"
+echo "Available BAM Delegation Stake : $(format_sol $available_bam_delegation_stake)" 
+echo "BAM Stake                      : $(format_sol $bam_stake)" 
+echo "JitoSOL Stake                  : $(format_sol $jitosol_stake)" 
+echo "Total Stake                    : $(format_sol $total_stake)"
 
 
 # Output formatted table header
@@ -93,10 +103,9 @@ count=1
 echo "$bam_validators" | jq -c '.[] | select(.is_eligible == true) | {identity_account, vote_account, active_stake}' | while IFS= read -r validator; do
     identity_account=$(echo "$validator" | jq -r '.identity_account')
     vote_account=$(echo "$validator" | jq -r '.vote_account')
-    active_stake=$(echo "$validator" | jq -r '.active_stake / 1000000000')  # Conversion of lamports into solans
-    active_stake_rounded=$(printf "%.1f" "$active_stake")  # Rounding to the first digit after the decimal point
-
-    printf "%-5s %-47s %-47s %-17s\n" "$count" "$identity_account" "$vote_account" "$active_stake_rounded"
+    active_stake=$(echo "$validator" | jq -r '.active_stake')
+    
+    printf "%-5s %-47s %-47s %-17s\n" "$count" "$identity_account" "$vote_account" "$(format_sol $active_stake)"
     ((count++))
 done
 
