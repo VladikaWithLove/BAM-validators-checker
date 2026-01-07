@@ -38,6 +38,28 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Pull validators
+bam_validators=$(echo "$response_bam_validators" | jq '.bam_validators')
+
+new_epoch=0
+
+# Data checking in current epoch
+if [ "$(echo "$bam_validators" | jq -r 'length')" -eq 0 ]; then
+    echo "No BAM Validators found for epoch $epoch_number."
+    
+    new_epoch=1
+    
+    # Decremented Epoch
+    epoch_number=$((epoch_number - new_epoch))
+    
+    # Make a GET request to the Jito BAM Validators API with the epoch parameter
+    response_bam_validators=$(curl -s "https://kobe.mainnet.jito.network/api/v1/bam_validators?epoch=$epoch_number")
+    
+    # Pull validators
+    bam_validators=$(echo "$response_bam_validators" | jq '.bam_validators')
+fi
+
+
 # Make a GET request to the Jito BAM Epoch Metrics API with the epoch parameter
 response_epoch_metrics=$(curl -s "https://kobe.mainnet.jito.network/api/v1/bam_epoch_metrics?epoch=$epoch_number")
 
@@ -66,15 +88,6 @@ bam_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.bam_stake') )
 jitosol_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.jitosol_stake') )
 total_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.total_stake') )
 
-# Pull validators
-bam_validators=$(echo "$response_bam_validators" | jq '.bam_validators')
-
-# Checking for validators
-if [ "$(echo "$bam_validators" | jq -r 'length')" -eq 0 ]; then
-    echo "No BAM Validators found for epoch $epoch_number."
-    exit 0
-fi
-
 # Processing and outputting validators
 total_validators=$(echo "$bam_validators" | jq '. | length')
 eligible_validators=$(echo "$bam_validators" | jq '[.[] | select(.is_eligible == true)] | length')
@@ -82,15 +95,18 @@ eligible_validators=$(echo "$bam_validators" | jq '[.[] | select(.is_eligible ==
 # Display summary statistics
 echo ""
 echo "-----------------------------------------------------------------------------------------------------------------------"
-echo "Epoch number            : $epoch_number"
-echo "------------------------------"
-echo "Total BAM Validators    : $total_validators"
-echo "Eligible BAM Validators : $eligible_validators"
-echo "------------------------------"
-echo "Available BAM Delegation Stake : $(format_sol $available_bam_delegation_stake)" 
-echo "BAM Stake                      : $(format_sol $bam_stake)" 
-echo "JitoSOL Stake                  : $(format_sol $jitosol_stake)" 
-echo "Total Stake                    : $(format_sol $total_stake)"
+if [ $new_epoch -eq 1 ]; then
+    echo "No data found for current epoch : $current_epoch"
+fi
+echo "Data from epoch number          : $epoch_number"
+echo "-------------------------------------"
+echo "Total BAM Validators            : $total_validators"
+echo "Eligible BAM Validators         : $eligible_validators"
+echo "-------------------------------------"
+echo "Available BAM Delegation Stake  : $(format_sol $available_bam_delegation_stake)" 
+echo "BAM Stake                       : $(format_sol $bam_stake)" 
+echo "JitoSOL Stake                   : $(format_sol $jitosol_stake)" 
+echo "Total Stake                     : $(format_sol $total_stake)"
 
 
 # Output formatted table header
