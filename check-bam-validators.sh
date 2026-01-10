@@ -67,7 +67,7 @@ cleanup_spinner() {
 
 trap cleanup_spinner EXIT
 
-# Побудова мапи: vote_account -> перша епоха eligible
+# Map construction: vote_account -> first epoch eligible
 declare -A earliest_epoch
 
 response_bam_validators=$(fetch_bam "$epoch_number") || {
@@ -82,8 +82,7 @@ new_epoch=0
 
 # Data checking in current epoch
 if [ "$(echo "$bam_validators" | jq -r 'length')" -eq 0 ]; then
-    echo "No BAM Validators found for epoch $epoch_number."
-    
+ 
     new_epoch=1
     
     # Decremented Epoch
@@ -124,10 +123,10 @@ fi
 bam_metrics=$(echo "$response_epoch_metrics" | jq '.bam_epoch_metrics')
 
 # Data processing and conversion of lamports into solans and rounding to the first digit after the decimal point
-available_bam_delegation_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.available_bam_delegation_stake') )
-bam_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.bam_stake') )
-jitosol_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.jitosol_stake') )
-total_stake=$(printf "%.1f" $(echo "$bam_metrics" | jq -r '.total_stake') )
+available_bam_delegation_stake=$(echo "$bam_metrics" | jq -r '.available_bam_delegation_stake')
+bam_stake=$(echo "$bam_metrics" | jq -r '.bam_stake')
+jitosol_stake=$(echo "$bam_metrics" | jq -r '.jitosol_stake')
+total_stake=$(echo "$bam_metrics" | jq -r '.total_stake')
 
 # Processing and outputting validators
 total_validators=$(echo "$bam_validators" | jq '. | length')
