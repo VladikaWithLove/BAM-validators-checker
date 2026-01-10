@@ -3,7 +3,7 @@
 # The script is under active development. This is far from the final version. Stay tuned!
 #
 # Bash script to display Jito-stake, BAM-stake and all Eligible BAM validators and their stake 🥩 value's 
-# Data is taken from the Jito API
+# Data is taken from the Jito BAM API
 #
 # USAGE
 # 1. Move file check-bam-validators.sh to your server  
