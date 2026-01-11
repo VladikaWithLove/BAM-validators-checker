@@ -2,7 +2,7 @@
 #
 # The script is under active development. This is far from the final version. Stay tuned!
 #
-# Bash script to display Jito-stake, BAM-stake and all Eligible BAM validators and their stake 🥩 value's 
+# Bash script to display Jito-stake, BAM-stake and all Eligible BAM validators and their stake 🥩 value's. The script also shows from which epoch the validator became Eligible for BAM delegation. 
 # Data is taken from the Jito BAM API
 #
 # USAGE
