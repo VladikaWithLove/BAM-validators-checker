@@ -5,6 +5,7 @@
 # Bash script to display Jito-stake, BAM-stake and all Eligible BAM validators and their stake 🥩 value's. The script also shows from which epoch the validator became Eligible for BAM delegation. 
 # Data is taken from the Jito BAM API
 #
+# Plans to add JIP-31 BAM Early Adopter Incentive data
 # USAGE
 # 1. Move file check-bam-validators.sh to your server  
 # 2. chmod u+x ./check-bam-validators.sh
